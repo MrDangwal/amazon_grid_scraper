@@ -43,18 +43,14 @@ def main():
             product_data = scrape_amazon_search(search_url, num_pages)
 
             df = pd.DataFrame(product_data, columns=['Product Name', 'Product Link', 'Review Count', 'Rating'])
-            filename = f"{num_pages}_RE_Re_Rating_amazon_products.csv"
-            
-            # Save the DataFrame to a temporary buffer
-            buffer = pd.ExcelWriter('temp.xlsx', engine='xlsxwriter')
-            df.to_excel(buffer, index=False, sheet_name='Sheet1')
-            buffer.save()
+            filename = f"{num_pages} RE_Re_Rating_amazon_products.csv"
+            df.to_csv(filename, index=False)
 
-            # Create a download link for the temporary buffer
-            st.markdown(f'Download your file [here](sandbox:/path/to/temp.xlsx)', unsafe_allow_html=True)
-            
-            # Delete the temporary buffer file after generating the download link
-            st.markdown("<script>document.querySelector('.markdown-ba78c5-Widget').style.display='none';</script>", unsafe_allow_html=True)
+            st.success(f'Scraping complete. Data saved to {filename}')
+
+            # Create a download link for the CSV file
+            with open(filename, 'rb') as file:
+                st.markdown(f"Download your file [here](data:file/csv;base64,{file.read().encode('base64').decode()})", unsafe_allow_html=True)
         else:
             st.warning("Please enter a valid Amazon search URL.")
 
