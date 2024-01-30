@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
+from io import BytesIO
 
 def scrape_amazon_search(search_url, num_pages):
     headers = {
@@ -43,14 +44,21 @@ def main():
             product_data = scrape_amazon_search(search_url, num_pages)
 
             df = pd.DataFrame(product_data, columns=['Product Name', 'Product Link', 'Review Count', 'Rating'])
-            filename = f"{num_pages} RE_Re_Rating_amazon_products.csv"
-            df.to_csv(filename, index=False)
 
-            st.success(f'Scraping complete. Data saved to {filename}')
+            # Create a BytesIO object to hold the CSV data
+            csv_data = BytesIO()
+            df.to_csv(csv_data, index=False)
+            csv_data.seek(0)
 
-            # Create a download link for the CSV file
-            with open(filename, 'rb') as file:
-                st.markdown(f"Download your file [here](data:file/csv;base64,{file.read().encode('base64').decode()})", unsafe_allow_html=True)
+            # Display download button for the CSV file
+            st.download_button(
+                label="Download CSV",
+                data=csv_data,
+                file_name=f"{num_pages}_RE_Re_Rating_amazon_products.csv",
+                key="download_button"
+            )
+
+            st.success('Scraping complete. Use the download button above to get the CSV file.')
         else:
             st.warning("Please enter a valid Amazon search URL.")
 
