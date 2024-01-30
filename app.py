@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-import csv
+import pandas as pd
 from bs4 import BeautifulSoup
 
 def scrape_amazon_search(search_url, num_pages):
@@ -32,12 +32,6 @@ def scrape_amazon_search(search_url, num_pages):
 
     return product_data
 
-def save_to_csv(data, filename):
-    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['Product Name', 'Product Link', 'Review Count', 'Rating'])
-        writer.writerows(data)
-
 def main():
     st.title("Amazon Scraper with Streamlit UI")
 
@@ -47,8 +41,10 @@ def main():
     if st.button("Scrape and Download"):
         if search_url:
             product_data = scrape_amazon_search(search_url, num_pages)
+
+            df = pd.DataFrame(product_data, columns=['Product Name', 'Product Link', 'Review Count', 'Rating'])
             filename = f"{num_pages} RE_Re_Rating_amazon_products.csv"
-            save_to_csv(product_data, filename)
+            df.to_csv(filename, index=False)
 
             st.success(f'Scraping complete. Data saved to {filename}')
             st.markdown(f'Download your file [here](sandbox:/path/to/{filename})')
